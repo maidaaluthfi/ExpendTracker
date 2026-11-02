@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker — Pencatat Pengeluaran Harian</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary:   { DEFAULT: '#2563EB', light: '#EFF6FF', dark: '#1D4ED8' },
+              income:    { DEFAULT: '#16A34A', light: '#F0FDF4' },
+              expense:   { DEFAULT: '#DC2626', light: '#FEF2F2' },
+              surface:   '#F8FAFC',
+              border:    '#E2E8F0',
+            },
+            fontFamily: {
+              sans: ['-apple-system', 'Segoe UI', 'system-ui', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body class="bg-surface font-sans text-slate-800 min-h-screen">
+
+    <!-- ===== HEADER ===== -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="max-w-3xl mx-auto px-4 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- Wallet icon (inline SVG) -->
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2"
+               viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 10h18M7 15h.01M11 15h2m-9-5V7a2 2 0 012-2h14a2 2 0 012 2v10
+                 a2 2 0 01-2 2H5a2 2 0 01-2-2v-3z"/>
+          </svg>
+          <h1 class="text-xl font-bold tracking-tight">Expense Tracker</h1>
+        </div>
+        <p class="text-sm text-blue-200 hidden sm:block">Pencatat Pengeluaran Harian</p>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+
+      <!-- ===== SUMMARY CARDS ===== -->
+      <section aria-label="Ringkasan Keuangan"
+               class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        <!-- Saldo -->
+        <article id="card-balance"
+                 class="summary-card bg-primary text-white">
+          <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Saldo</p>
+          <p id="display-balance" class="text-2xl font-bold mt-1">Rp 0</p>
+        </article>
+
+        <!-- Pemasukan -->
+        <article class="summary-card bg-income-light border border-income/20">
+          <div class="flex items-center gap-2 text-income">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"
+                 viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+            </svg>
+            <p class="text-xs font-semibold uppercase tracking-wider">Pemasukan</p>
+          </div>
+          <p id="display-income" class="text-2xl font-bold mt-1 text-income">Rp 0</p>
+        </article>
+
+        <!-- Pengeluaran -->
+        <article class="summary-card bg-expense-light border border-expense/20">
+          <div class="flex items-center gap-2 text-expense">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"
+                 viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+            <p class="text-xs font-semibold uppercase tracking-wider">Pengeluaran</p>
+          </div>
+          <p id="display-expense" class="text-2xl font-bold mt-1 text-expense">Rp 0</p>
+        </article>
+
+      </section>
+
+      <!-- ===== ADD / EDIT FORM ===== -->
+      <section aria-label="Form Transaksi"
+               class="bg-white rounded-2xl shadow-sm border border-border p-5">
+        <h2 id="form-title" class="text-base font-semibold text-slate-700 mb-4">
+          Tambah Transaksi
+        </h2>
+
+        <form id="transaction-form" novalidate class="space-y-4">
+
+          <!-- Hidden ID for edit mode -->
+          <input type="hidden" id="edit-id" value="" />
+
+          <!-- Description -->
+          <div>
+            <label for="input-description"
+                   class="block text-sm font-medium text-slate-600 mb-1">
+              Deskripsi <span class="text-expense">*</span>
+            </label>
+            <input type="text" id="input-description"
+                   placeholder="Contoh: Makan siang, Gaji, Bensin…"
+                   maxlength="80"
+                   class="form-input" />
+            <p id="err-description" class="form-error hidden">Deskripsi wajib diisi.</p>
+          </div>
+
+          <!-- Amount -->
+          <div>
+            <label for="input-amount"
+                   class="block text-sm font-medium text-slate-600 mb-1">
+              Jumlah (Rp) <span class="text-expense">*</span>
+            </label>
+            <input type="number" id="input-amount"
+                   placeholder="0"
+                   min="1"
+                   class="form-input" />
+            <p id="err-amount" class="form-error hidden">Jumlah harus lebih dari 0.</p>
+          </div>
+
+          <!-- Category + Type (side-by-side on ≥sm) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <!-- Category -->
+            <div>
+              <label for="input-category"
+                     class="block text-sm font-medium text-slate-600 mb-1">
+                Kategori
+              </label>
+              <select id="input-category" class="form-input">
+                <option value="Makanan">🍔 Makanan</option>
+                <option value="Transportasi">🚗 Transportasi</option>
+                <option value="Hiburan">🎮 Hiburan</option>
+                <option value="Kesehatan">🏥 Kesehatan</option>
+                <option value="Belanja">🛍️ Belanja</option>
+                <option value="Tagihan">💡 Tagihan</option>
+                <option value="Gaji">💼 Gaji</option>
+                <option value="Investasi">📈 Investasi</option>
+                <option value="Lainnya">📦 Lainnya</option>
+              </select>
+            </div>
+
+            <!-- Type -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-1">Jenis</label>
+              <div class="flex gap-3 mt-2">
+                <label class="type-radio">
+                  <input type="radio" name="type" value="expense" checked />
+                  <span class="type-label expense-label">Pengeluaran</span>
+                </label>
+                <label class="type-radio">
+                  <input type="radio" name="type" value="income" />
+                  <span class="type-label income-label">Pemasukan</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label for="input-date"
+                   class="block text-sm font-medium text-slate-600 mb-1">Tanggal</label>
+            <input type="date" id="input-date" class="form-input" />
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-3 pt-1">
+            <button type="submit" id="btn-submit"
+                    class="btn-primary flex-1">
+              Simpan Transaksi
+            </button>
+            <button type="button" id="btn-cancel"
+                    class="btn-secondary hidden">
+              Batal
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ===== FILTER & SEARCH ===== -->
+      <section aria-label="Filter Transaksi"
+               class="bg-white rounded-2xl shadow-sm border border-border p-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+
+          <!-- Search -->
+          <div class="relative flex-1">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+            </svg>
+            <input type="search" id="filter-search"
+                   placeholder="Cari deskripsi…"
+                   class="form-input pl-9" />
+          </div>
+
+          <!-- Category filter -->
+          <select id="filter-category" class="form-input sm:w-44">
+            <option value="">Semua Kategori</option>
+            <option value="Makanan">Makanan</option>
+            <option value="Transportasi">Transportasi</option>
+            <option value="Hiburan">Hiburan</option>
+            <option value="Kesehatan">Kesehatan</option>
+            <option value="Belanja">Belanja</option>
+            <option value="Tagihan">Tagihan</option>
+            <option value="Gaji">Gaji</option>
+            <option value="Investasi">Investasi</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+
+          <!-- Type filter -->
+          <select id="filter-type" class="form-input sm:w-36">
+            <option value="">Semua Jenis</option>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+          </select>
+
+        </div>
+      </section>
+
+      <!-- ===== TRANSACTION LIST ===== -->
+      <section aria-label="Daftar Transaksi">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-semibold text-slate-700">Riwayat Transaksi</h2>
+          <span id="transaction-count"
+                class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+            0 transaksi
+          </span>
+        </div>
+
+        <!-- List -->
+        <ul id="transaction-list" class="space-y-3" aria-live="polite">
+          <!-- Items injected by JS -->
+        </ul>
+
+        <!-- Empty state -->
+        <div id="empty-state"
+             class="text-center py-14 text-slate-400 hidden">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none"
+               stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+               aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 14l6-6m0 0l-6-6m6 6H3m12 6h6m-6 0l3 3m-3-3l3-3"/>
+          </svg>
+          <p class="text-sm font-medium">Belum ada transaksi.</p>
+          <p class="text-xs mt-1">Tambahkan transaksi pertama Anda di atas.</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ===== DELETE CONFIRMATION MODAL ===== -->
+    <div id="modal-overlay"
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center
+                justify-center z-50 hidden px-4"
+         role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex-shrink-0 bg-expense-light text-expense
+                       rounded-full p-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0
+                   001.71 3h16.94a2 2 0 001.71-3L13.71
+                   3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+          </span>
+          <div>
+            <h3 id="modal-title" class="font-semibold text-slate-800">Hapus Transaksi</h3>
+            <p class="text-sm text-slate-500 mt-1">
+              Yakin ingin menghapus transaksi ini? Tindakan tidak dapat dibatalkan.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+          <button id="modal-cancel"
+                  class="btn-secondary">Batal</button>
+          <button id="modal-confirm"
+                  class="btn-danger">Ya, Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

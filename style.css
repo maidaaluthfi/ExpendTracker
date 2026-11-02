@@ -1,0 +1,139 @@
+/* =========================================================
+   style.css — Custom styles for Expense Tracker
+   Tailwind handles most styling; this file covers:
+   - Reusable component classes (@layer components)
+   - Custom transitions & animations
+   - Scrollbar styling
+   ========================================================= */
+
+/* ----- Reusable component classes (Tailwind @layer) ----- */
+@layer components {
+
+  /* Summary card base */
+  .summary-card {
+    @apply rounded-2xl p-5 shadow-sm transition-transform duration-200;
+  }
+  .summary-card:hover {
+    @apply -translate-y-0.5;
+  }
+
+  /* Generic form input / select */
+  .form-input {
+    @apply w-full rounded-xl border border-border bg-white px-3.5 py-2.5
+           text-sm text-slate-800 placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary
+           transition duration-150;
+  }
+
+  /* Inline form error text */
+  .form-error {
+    @apply text-xs text-expense mt-1;
+  }
+
+  /* Primary (blue) button */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white text-sm font-semibold
+           px-5 py-2.5 rounded-xl transition duration-150 active:scale-95
+           focus:outline-none focus:ring-2 focus:ring-primary/50;
+  }
+
+  /* Secondary (ghost) button */
+  .btn-secondary {
+    @apply bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold
+           px-5 py-2.5 rounded-xl border border-border transition duration-150
+           active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-300;
+  }
+
+  /* Danger (red) button */
+  .btn-danger {
+    @apply bg-expense hover:bg-red-700 text-white text-sm font-semibold
+           px-5 py-2.5 rounded-xl transition duration-150 active:scale-95
+           focus:outline-none focus:ring-2 focus:ring-expense/40;
+  }
+
+  /* Radio-button wrapper for income / expense type selector */
+  .type-radio {
+    @apply cursor-pointer flex items-center;
+  }
+  .type-radio input[type="radio"] {
+    @apply sr-only; /* visually hidden, label acts as the button */
+  }
+  .type-label {
+    @apply text-xs font-semibold px-4 py-2 rounded-xl border-2 transition
+           duration-150 select-none;
+  }
+
+  /* Default (unselected) state */
+  .expense-label {
+    @apply border-expense/30 text-expense/70;
+  }
+  .income-label {
+    @apply border-income/30 text-income/70;
+  }
+
+  /* Selected state — toggled via JS class */
+  .type-radio input[type="radio"]:checked + .expense-label {
+    @apply bg-expense-light border-expense text-expense;
+  }
+  .type-radio input[type="radio"]:checked + .income-label {
+    @apply bg-income-light border-income text-income;
+  }
+
+  /* Transaction list item */
+  .tx-item {
+    @apply flex items-start gap-4 bg-white rounded-2xl border border-border
+           px-4 py-3.5 shadow-sm transition duration-200;
+  }
+  .tx-item:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  /* Category icon badge */
+  .tx-icon {
+    @apply flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+           text-lg leading-none;
+  }
+
+  /* Edit icon button */
+  .btn-edit {
+    @apply p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary-light
+           transition duration-150 focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  /* Delete icon button */
+  .btn-delete {
+    @apply p-1.5 rounded-lg text-slate-400 hover:text-expense hover:bg-expense-light
+           transition duration-150 focus:outline-none focus:ring-2 focus:ring-expense/30;
+  }
+}
+
+/* ----- Transaction item enter animation ----- */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tx-item {
+  animation: fadeSlideIn 0.2s ease-out both;
+}
+
+/* ----- Custom scrollbar (Webkit) ----- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
